@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "module": "ES2022",
+    "target": "ES2021",
+    "moduleResolution": "node",
+
+    // Output configuration for production builds
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    // Path aliases for clean imports
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@api/*": ["src/api/*"],
+      "@dashboard/*": ["src/dashboard/*"],
+      "@storage/*": ["src/storage/*"],
+      "@utils/*": ["src/utils/*"],
+      "@lib/*": ["src/lib/*"]
+    },
+
+    // Compiler checks and settings
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
+}

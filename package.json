@@ -1,0 +1,39 @@
+{
+  "name": "helia-ts",
+  "version": "1.0.2",
+  "private": true,
+  "type": "module",
+  "description": "Running Helia with ts-node",
+  "scripts": {
+    "dev": "nodemon --exec tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc && tsc-alias && echo 'Build complete: ./dist'",
+    "test": "node --import tsx --test --test-concurrency=1 test/**/*.test.js",
+    "clear-peerstore": "node --import tsx scripts/clear-peerstore.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.297.0",
+    "@chainsafe/libp2p-yamux": "^8.0.0",
+    "@helia/block-brokers": "^5.1.0",
+    "@helia/unixfs": "^6.0.4",
+    "@libp2p/identify": "^4.0.9",
+    "@libp2p/mplex": "^12.0.10",
+    "@libp2p/noise": "^1.0.1",
+    "@libp2p/ping": "^3.0.10",
+    "@libp2p/tcp": "^11.0.9",
+    "@smithy/node-http-handler": "^4.4.9",
+    "blockstore-s3": "^3.0.1",
+    "datastore-s3": "^13.0.1",
+    "dotenv": "^17.2.3",
+    "helia": "^6.0.16",
+    "pino": "^10.1.0",
+    "pino-pretty": "^13.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "nodemon": "^3.1.10",
+    "tsc-alias": "^1.8.17",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

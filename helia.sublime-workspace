@@ -1,0 +1,750 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"crea",
+				"createRelation"
+			],
+			[
+				"han",
+				"handleClick"
+			],
+			[
+				"relatio",
+				"relationKey"
+			],
+			[
+				"use",
+				"useRelation"
+			],
+			[
+				"Pro",
+				"ProfileCard"
+			],
+			[
+				"con",
+				"console"
+			],
+			[
+				"fo",
+				"formData"
+			],
+			[
+				"re",
+				"relation"
+			],
+			[
+				"on",
+				"onUnmounted"
+			],
+			[
+				"int",
+				"interest"
+			],
+			[
+				"cons",
+				"console"
+			],
+			[
+				"newIn",
+				"newInterests"
+			],
+			[
+				"fi",
+				"filteredOptions"
+			],
+			[
+				"compo",
+				"composables"
+			],
+			[
+				"user",
+				"userProfiles"
+			],
+			[
+				"getBy",
+				"getByEmail"
+			],
+			[
+				"auth",
+				"authReq"
+			],
+			[
+				"MagicL",
+				"MagicLink"
+			],
+			[
+				"handlemagi",
+				"handleMagicLinkLogin"
+			],
+			[
+				"handlemagicl",
+				"handleMagicLinkRegister"
+			],
+			[
+				"get",
+				"getAll"
+			],
+			[
+				"Fr",
+				"FormData"
+			],
+			[
+				"p",
+				"profileLocation"
+			],
+			[
+				"intere",
+				"interestRelations"
+			],
+			[
+				"Re",
+				"RelationListItem"
+			],
+			[
+				"rela",
+				"relationKeys"
+			],
+			[
+				"Other",
+				"OtherInterest"
+			],
+			[
+				"setS",
+				"searchResult"
+			],
+			[
+				"getLo",
+				"getLocationByBounds"
+			],
+			[
+				"loca",
+				"locationProfiles"
+			],
+			[
+				"profile",
+				"profileLocations"
+			],
+			[
+				"no",
+				"console"
+			],
+			[
+				"inte",
+				"interestId"
+			],
+			[
+				"profil",
+				"profiles"
+			],
+			[
+				"upd",
+				"updatedVotes"
+			],
+			[
+				"Disc",
+				"DiscussionListItem"
+			],
+			[
+				"comp",
+				"components"
+			],
+			[
+				"Dis",
+				"DisdussionListItem"
+			],
+			[
+				"def",
+				"defaultValue"
+			],
+			[
+				"find",
+				"findUnique"
+			],
+			[
+				"update",
+				"updatedInterest"
+			],
+			[
+				"wt",
+				"watchEffect"
+			],
+			[
+				"wa",
+				"watch"
+			],
+			[
+				"default",
+				"defaultPluginSettings"
+			],
+			[
+				"pl",
+				"pluginSettings"
+			],
+			[
+				"ro",
+				"routes"
+			],
+			[
+				"InterestPlu",
+				"InterestPluginRoutes"
+			],
+			[
+				"INterest",
+				"InterestPluginRoutes"
+			],
+			[
+				"file",
+				"fileURLToPath"
+			],
+			[
+				"in",
+				"InterestBadge"
+			],
+			[
+				"fetchI",
+				"fetchInterestChildren"
+			],
+			[
+				"wiki",
+				"wikiPage"
+			],
+			[
+				"interes",
+				"interests"
+			],
+			[
+				"remove",
+				"removeInterest"
+			],
+			[
+				"w",
+				"WikiEdit"
+			],
+			[
+				"location",
+				"locationId"
+			],
+			[
+				"findInter",
+				"findInterestById"
+			],
+			[
+				"flex",
+				"flex-col"
+			],
+			[
+				"Call",
+				"Callout"
+			],
+			[
+				"Ca",
+				"Callout"
+			],
+			[
+				"selet",
+				"selectedModel"
+			],
+			[
+				"inter",
+				"interestId"
+			],
+			[
+				"fl",
+				"flex-row"
+			],
+			[
+				"L",
+				"LocationBadge"
+			],
+			[
+				"cla",
+				"className"
+			],
+			[
+				"Profile",
+				"ProfileImage"
+			],
+			[
+				"too",
+				"Tooltip"
+			],
+			[
+				"pro",
+				"ProfileImage"
+			],
+			[
+				"ol-",
+				"ol-geolocation"
+			],
+			[
+				"create",
+				"createLocation"
+			],
+			[
+				"selecte",
+				"selectedImage"
+			],
+			[
+				"select",
+				"selectedOption"
+			],
+			[
+				"sele",
+				"selectedOption"
+			],
+			[
+				"pr",
+				"profile"
+			],
+			[
+				"Diamond",
+				"DiamondCard"
+			],
+			[
+				"f",
+				"false"
+			],
+			[
+				"pri",
+				"priority"
+			],
+			[
+				"item",
+				"item_ids"
+			],
+			[
+				"Tab",
+				"TableCell"
+			],
+			[
+				"cost",
+				"cost_credits"
+			],
+			[
+				"po",
+				"points_type"
+			],
+			[
+				"ite",
+				"items-center"
+			],
+			[
+				"size",
+				"sizeStyle"
+			],
+			[
+				"convers",
+				"conversationId"
+			],
+			[
+				"co",
+				"conversationId"
+			],
+			[
+				"conver",
+				"conversationId"
+			],
+			[
+				"Chat",
+				"ChatMessage2"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": ".env",
+			"redo_stack":
+			[
+				[
+					13,
+					1,
+					"insert",
+					{
+						"characters": "4000"
+					},
+					"BAAAAFkAAAAAAAAAWQAAAAAAAAABAAAAMFgAAAAAAAAAWAAAAAAAAAABAAAAMFcAAAAAAAAAVwAAAAAAAAABAAAAMFYAAAAAAAAAWgAAAAAAAAABAAAANA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABaAAAAAAAAAFoAAAAAAAAAAAAAAAAA8L8"
+				]
+			],
+			"settings":
+			{
+				"buffer_size": 314,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					7,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AQAAAFsAAAAAAAAAXAAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABbAAAAAAAAAFsAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					8,
+					1,
+					"paste",
+					null,
+					"AQAAAFwAAAAAAAAAbAAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABcAAAAAAAAAFwAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					9,
+					1,
+					"insert",
+					{
+						"characters": "="
+					},
+					"AQAAAGwAAAAAAAAAbQAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABsAAAAAAAAAGwAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					10,
+					1,
+					"insert_snippet",
+					{
+						"contents": "\"$0\""
+					},
+					"AQAAAG0AAAAAAAAAbwAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABtAAAAAAAAAG0AAAAAAAAAAAAAAAAA8L8"
+				]
+			]
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"rein",
+				"Indentation: Reindent Lines"
+			],
+			[
+				"",
+				"Code Folding: Fold Tag Attributes"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/yannik/js/helia-ts"
+	],
+	"file_history":
+	[
+		"/Users/yannik/js/glashaus/packages/glashaus-console/.env",
+		"/Users/yannik/js/glashaus/.env.local",
+		"/Users/yannik/js/glashaus/package.json",
+		"/Users/yannik/Documents/Freiberufler/whoami.md",
+		"/Users/yannik/js/glashaus/app/page.tsx",
+		"/Users/yannik/js/glashaus/app/globals.css",
+		"/Users/yannik/js/glashaus/tailwind.config.ts",
+		"/Users/yannik/js/glashaus/app/documentation/api/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/shared/DocumentationCard.tsx",
+		"/Users/yannik/js/glashaus/app/admin/analytics/page.tsx",
+		"/Users/yannik/js/glashaus/packages/glashaus-discord/.env",
+		"/Users/yannik/js/glashaus/app/documentation/mcp/page.tsx",
+		"/Users/yannik/js/glashaus/app/deployment/layout.tsx",
+		"/Users/yannik/js/glashaus/app/deployment/[cid]/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/gateway/GatewayClient.tsx",
+		"/Users/yannik/js/glashaus/next.config.ts",
+		"/Users/yannik/js/glashaus/app/layout.tsx",
+		"/Users/yannik/js/glashaus/packages/glashaus-console/src/interactive-agent.ts",
+		"/Users/yannik/js/glashaus/src/components/website/WebsiteIFrame.tsx",
+		"/Users/yannik/js/glashaus/packages/glashaus-telegram/.env",
+		"/Users/yannik/js/glashaus/.gitignore",
+		"/Users/yannik/js/glashaus/packages/glashaus-mcp/package.json",
+		"/Users/yannik/js/glashaus/packages/glashaus-discord/.env.example",
+		"/Users/yannik/js/glashaus/app/admin/page.tsx",
+		"/Users/yannik/js/nitro/passphrases.txt",
+		"/Users/yannik/js/nitro/next-app/deploy/FEDORA_42_GUIDE.md",
+		"/Users/yannik/.ssh/known_hosts",
+		"/Users/yannik/.ssh/nexthabbo.pub",
+		"/Users/yannik/.ssh/nexthabbo",
+		"/Users/yannik/js/glashaus/agent/interactive-agent.ts",
+		"/Users/yannik/js/glashaus/src/components/shared/BannerStack.tsx",
+		"/Users/yannik/js/glashaus/src/components/shared/CookieBanner.tsx",
+		"/Users/yannik/js/glashaus/app/pricing/page.tsx",
+		"/Users/yannik/js/glashaus/instrumentation.ts",
+		"/Users/yannik/js/glashaus_old/src/components/table/FileTable.tsx",
+		"/Users/yannik/js/glashaus/app/docs/api/page.tsx",
+		"/Users/yannik/js/glashaus/app/admin-login/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/table/FileTable.tsx",
+		"/Users/yannik/js/glashaus/local/.env",
+		"/Users/yannik/js/glashaus/CLAUDE.md",
+		"/Users/yannik/js/glashaus/docs/ROADMAP.md",
+		"/Users/yannik/js/glashaus/src/components/admin/AdminNav.tsx",
+		"/Users/yannik/js/glashaus/examples/direct-agent.ts",
+		"/Users/yannik/js/glashaus/src/components/table/GenericTable.tsx",
+		"/Users/yannik/js/glashaus/src/components/table/PeerTable.tsx",
+		"/Users/yannik/js/glashaus_old/src/components/table/PeerTable.tsx",
+		"/Users/yannik/js/glashaus_old/src/components/table/GenericTable.tsx",
+		"/Users/yannik/js/glashaus/src/components/table/TransactionsTable.tsx",
+		"/Users/yannik/js/glashaus/app/files/dht/page.tsx",
+		"/Users/yannik/js/glashaus/docs/ARCHITECTURE.md",
+		"/Users/yannik/js/glashaus/ROADMAP.md",
+		"/Users/yannik/js/glashaus/public/analytics.js",
+		"/Users/yannik/Downloads/Pokemon-master/index.html",
+		"/Users/yannik/js/glashaus/app/files/dht/visualization/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/table/DHTStatusTable.tsx",
+		"/Users/yannik/js/glashaus/src/components/files/DHTStatusTable.tsx",
+		"/Users/yannik/js/glashaus/src/lib/navigation.ts",
+		"/Users/yannik/js/glashaus/src/components/files/UploadDropzone.tsx",
+		"/Users/yannik/js/glashaus/src/components/files/FileUpload.tsx",
+		"/Users/yannik/js/tetris/index.html",
+		"/Users/yannik/js/glashaus/app/static/page.tsx",
+		"/Users/yannik/js/glashaus/prometheus/prometheus.yml",
+		"/Users/yannik/js/nomadcamp/.env.local",
+		"/Users/yannik/js/api_keys.txt",
+		"/Users/yannik/js/glashaus/api_keys.txt",
+		"/Users/yannik/.claude/whoami.md",
+		"/Users/yannik/js/mtgah/.env",
+		"/Users/yannik/.claude/whoami2.md",
+		"/Users/yannik/.claude/whoami3.md",
+		"/Users/yannik/js/glashaus/docker-compose.yml",
+		"/Users/yannik/js/glashaus/src/components/system/PeerTracker.tsx",
+		"/Users/yannik/js/glashaus/src/components/common/Tracker.tsx",
+		"/Users/yannik/js/glashaus/src/components/files/FilesPageClient.tsx",
+		"/Users/yannik/js/glashaus/app/system/network-map/page.tsx",
+		"/Users/yannik/js/glashaus/app/system/peers/page.tsx",
+		"/Users/yannik/js/glashaus/src/actions/peers.ts",
+		"/Users/yannik/Downloads/files-2/architecture-node.md",
+		"/Users/yannik/js/glashaus/.env.local.example",
+		"/Users/yannik/js/glashaus/plans.config.ts",
+		"/Users/yannik/js/glashaus/src/components/shared/EarlyAccessBanner.tsx",
+		"/Users/yannik/js/nitro/simple/.env",
+		"/Users/yannik/js/nitro/next-app/.env",
+		"/Users/yannik/.claude/projects/-Users-yannik-js-glashaus/memory/MEMORY.md",
+		"/Users/yannik/js/glashaus/app/account/quota-exceeded/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/account/QuotaExceededClient.tsx",
+		"/Users/yannik/js/glashaus/app/payment/success/page.tsx",
+		"/Users/yannik/js/glashaus/src/lib/plans.ts",
+		"/Users/yannik/js/glashaus/deploy/production-setup.sh",
+		"/Users/yannik/js/glashaus/src/components/payments/SuccessContentClient.tsx",
+		"/Users/yannik/js/glashaus/app/account/plan/success/route.ts",
+		"/Users/yannik/js/glashaus/src/components/plans/AccountPlansClient.tsx",
+		"/Users/yannik/js/glashaus/src/components/feedback/FeedbackSuccessModal.tsx",
+		"/Users/yannik/js/glashaus/src/components/feedback/FeedbackModal.tsx",
+		"/Users/yannik/js/glashaus/app/api/gateway/ipfs/[cid]/route.ts",
+		"/Users/yannik/js/glashaus/src/components/common/Select.tsx",
+		"/Users/yannik/js/glashaus/app/admin/feedback/[id]/FeedbackDetailClient.tsx",
+		"/Users/yannik/js/glashaus/src/components/common/Textarea.tsx",
+		"/Users/yannik/js/glashaus/app/events/early-access/page.tsx",
+		"/Users/yannik/js/glashaus/app/account/plans/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/plans/PlansPageClient.tsx",
+		"/Users/yannik/js/glashaus/app/account/settings/page.tsx",
+		"/Users/yannik/js/glashaus/.env.production",
+		"/Users/yannik/js/glashaus/app/pricing/[slug]/page.tsx",
+		"/Users/yannik/js/glashaus/app/(auth)/signup/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/layout/HeaderNavigationWrapper.tsx",
+		"/Users/yannik/js/glashaus/app/(auth)/layout.tsx",
+		"/Users/yannik/js/glashaus/src/components/shared/UserAuthContent.tsx",
+		"/Users/yannik/js/glashaus/src/components/layout/MobileNavigation.tsx",
+		"/Users/yannik/js/glashaus/app/admin/layout.tsx",
+		"/Users/yannik/js/glashaus/app/files/layout.tsx",
+		"/Users/yannik/js/glashaus/auth.ts",
+		"/Users/yannik/js/glashaus/src/components/layout/Footer.tsx",
+		"/Users/yannik/js/glashaus/app/developer/api-keys/client.tsx",
+		"/Users/yannik/js/glashaus/app/docs/page.tsx",
+		"/Users/yannik/js/glashaus/app/docs/privacy/page.tsx",
+		"/Users/yannik/js/glashaus/app/docs/terms/page.tsx",
+		"/Users/yannik/js/glashaus/app/docs/tos/page.tsx",
+		"/Users/yannik/js/glashaus/app/docs/tos.tsx",
+		"/Users/yannik/js/glashaus/app/docs/layout.tsx",
+		"/Users/yannik/js/glashaus/src/components/common/ProgressBar.tsx",
+		"/Users/yannik/js/glashaus/src/lib/services/PlansSyncService.ts",
+		"/Users/yannik/js/glashaus/app/(auth)/login/page.tsx",
+		"/Users/yannik/js/glashaus/app/account/plans/[slug]/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/layout/Header.tsx",
+		"/Users/yannik/js/glashaus/src/components/files/ImportByCid.tsx",
+		"/Users/yannik/js/glashaus/app/plans/[slug]/page.tsx",
+		"/Users/yannik/js/glashaus/src/components/common/Callout.tsx",
+		"/Users/yannik/js/glashaus/src/lib/services/ServiceFactory.ts"
+	],
+	"find":
+	{
+		"height": 30.0
+	},
+	"find_in_files":
+	{
+		"height": 101.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": ".env",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 314,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								111,
+								92
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 30.0
+	},
+	"input":
+	{
+		"height": 42.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"pinned_build_system": "",
+	"project": "helia.sublime-project",
+	"replace":
+	{
+		"height": 56.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 249.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
