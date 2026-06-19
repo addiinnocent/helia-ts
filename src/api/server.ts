@@ -7,7 +7,7 @@ import { getHeliaInstance, getHeliaPeerId, getMultiaddrs, getConnectionDetails }
 import { addString, addBytes, addFile } from '@lib/add.js'
 import { getBytes } from '@lib/get.js'
 import { pinCID, unpinCID, isPinned, listPins } from '@lib/pin.js'
-import { provideCID } from '@lib/routing.js'
+import { provideCID, findProviders } from '@lib/routing.js'
 import { createComponentLogger } from '@utils/logger.js'
 
 const logger = createComponentLogger('api')
@@ -338,6 +338,48 @@ async function handleRequest(req: any, res: any): Promise<void> {
       return
     }
 
+    // GET /api/v0/routing/findprovs?arg=<cid>&num-providers=<int>
+    if (req.method === 'GET' && urlPath === '/api/v0/routing/findprovs') {
+      const cidStr = getQueryParam(req.url, 'arg')
+      if (!cidStr) {
+        res.writeHead(400)
+        res.end(JSON.stringify({ Message: 'Missing required arg parameter', Code: 1 }))
+        return
+      }
+
+      let cid: CID
+      try {
+        cid = CID.parse(cidStr)
+      } catch {
+        res.writeHead(400)
+        res.end(JSON.stringify({ Message: 'Invalid CID', Code: 1 }))
+        return
+      }
+
+      const numProvidersStr = getQueryParam(req.url, 'num-providers')
+      let maxProviders = 20
+      if (numProvidersStr) {
+        const parsed = parseInt(numProvidersStr, 10)
+        if (!isNaN(parsed) && parsed > 0) {
+          maxProviders = parsed
+        }
+      }
+
+      try {
+        const providers = await findProviders(helia, cid, { maxProviders, timeout: 20000 })
+        const responses = providers.map(provider => ({
+          ID: provider.id.toString(),
+          Addrs: provider.multiaddrs.map(ma => ma.toString())
+        }))
+        res.writeHead(200)
+        res.end(JSON.stringify({ Responses: responses }))
+      } catch (error: any) {
+        res.writeHead(500)
+        res.end(JSON.stringify({ Message: error.message || 'Failed to find providers', Code: 1 }))
+      }
+      return
+    }
+
     // GET /api/v0/id
     if (req.method === 'GET' && urlPath === '/api/v0/id') {
       const peerId = getHeliaPeerId()
@@ -583,6 +625,7 @@ export function startApiServer() {
     console.log(`  POST /api/v0/pin/rm?arg=<cid> - Unpin a CID`)
     console.log(`  GET /api/v0/pin/ls - List all pinned CIDs`)
     console.log(`  POST /api/v0/routing/provide?arg=<cid> - Announce CID to DHT`)
+    console.log(`  GET /api/v0/routing/findprovs?arg=<cid>&num-providers=<int> - Find providers for CID`)
     console.log(`  GET /api/v0/stats/bw - Bandwidth stats`)
   })
 
