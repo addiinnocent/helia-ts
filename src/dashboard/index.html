@@ -165,8 +165,10 @@
         <dd>Connect to a peer by multiaddress</dd>
         <dt>POST /api/v0/swarm/disconnect?arg=&lt;multiaddr&gt;</dt>
         <dd>Disconnect from a peer</dd>
-        <dt>POST /api/v0/routing/provide</dt>
-        <dd>Announce content availability to DHT for peer discovery: JSON <span class="status-value">{"cid":"..."}</span></dd>
+        <dt>POST /api/v0/routing/provide?arg=&lt;cid&gt;</dt>
+        <dd>Announce content availability to DHT for peer discovery</dd>
+        <dt>GET /api/v0/routing/findprovs?arg=&lt;cid&gt;&num-providers=20</dt>
+        <dd>Find peers advertising a CID on the DHT (optional num-providers parameter)</dd>
         <dt>POST /api/v0/add</dt>
         <dd>Add content: multipart/form-data, JSON <span class="status-value">{"content":"..."}</span>, or raw binary</dd>
         <dt>GET /api/v0/cat?arg=&lt;cid&gt;</dt>
