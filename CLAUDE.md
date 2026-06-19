@@ -51,6 +51,7 @@ Comprehensive documentation is available in the `.md/` directory:
 - Test files are located in `test/` directory
 - Run all tests: `npm test`
 - See [TESTING.md](.md/TESTING.md) for comprehensive testing guide
+- **Do NOT test after every small code change.** Only run tests when specifically requested by the user or when critical functionality needs verification before committing. Trust the implementation and let the user decide when testing is appropriate.
 
 ### Dashboard (Monitoring Interface)
 
@@ -80,6 +81,7 @@ npm run dev
 - Dashboard runs on separate port and does not interfere with core Helia
 - Starts/stops automatically with main server
 - To add new metrics: (1) add to `src/dashboard/server.js` metrics object, (2) update `index.html` to display
+- **When adding new API endpoints:** Update the "API Routes (IPFS Standard)" section in `src/dashboard/index.html` with a `<dt>` (endpoint) and `<dd>` (description) pair. This keeps the documentation in sync with the actual API.
 - Metrics reflect real-time Helia state via `getHeliaPeerId()`, `isHeliaRunning()`, `isS3ClientReady()`, etc.
 - Dashboard design is intentionally minimal: bare HTML, no auto-refresh, no decorative styling
 

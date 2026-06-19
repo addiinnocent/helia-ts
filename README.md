@@ -39,6 +39,16 @@
 
 ## About The Project
 
+A minimal Helia (IPFS implementation in JavaScript) node with S3-backed storage and an HTTP API compatible with Kubo. This project demonstrates running Helia with TypeScript and provides a RESTful interface for IPFS operations.
+
+**Key Features:**
+- Helia node with libp2p peer-to-peer networking
+- S3/MinIO persistent storage (blockstore and datastore)
+- HTTP API for content addressing, pinning, and DHT operations
+- Monitoring dashboard for node status and metrics
+- Support for Node.js v24
+
+**Documentation:**
 - Read the [docs](https://ipfs.github.io/helia/modules/helia.html)
 - Look into other [examples](https://github.com/ipfs-examples/helia-examples) to learn how to spawn a Helia node in Node.js and in the Browser
 - Visit https://dweb-primer.ipfs.io to learn about IPFS and the concepts that underpin it
@@ -60,8 +70,47 @@ Make sure you have installed all of the following prerequisites on your developm
 
 ```console
 > npm install
-> npm start
+> npm run dev
 ```
+
+Access the HTTP API at `http://localhost:8081/api/v0` and the monitoring dashboard at `http://localhost:9999`.
+
+## HTTP API
+
+The node exposes a Kubo-compatible HTTP API on port 8081 (configurable via `API_PORT` environment variable).
+
+### Endpoints
+
+**Content Operations:**
+- `POST /api/v0/add` - Add content to IPFS (supports multipart/form-data, JSON, and raw binary)
+- `GET /api/v0/cat?arg=<cid>` - Retrieve content by CID
+- `GET /api/v0/block/get?arg=<cid>` - Get raw block data
+- `POST /api/v0/block/put` - Store raw block
+- `GET /api/v0/block/stat?arg=<cid>` - Get block metadata
+
+**Pinning:**
+- `POST /api/v0/pin/add?arg=<cid>` - Pin a CID
+- `POST /api/v0/pin/rm?arg=<cid>` - Unpin a CID
+- `GET /api/v0/pin/ls` - List all pinned CIDs (optional `?arg=<cid>` to check specific CID)
+
+**DHT Routing:**
+- `POST /api/v0/routing/provide?arg=<cid>` - Announce content to the DHT
+- `GET /api/v0/routing/findprovs?arg=<cid>&num-providers=20` - Find peers advertising a CID
+
+**Peer Management:**
+- `GET /api/v0/id` - Get node identity and addresses
+- `GET /api/v0/swarm/peers` - List connected peers
+- `GET /api/v0/swarm/addrs/local` - Get local multiaddresses
+- `POST /api/v0/swarm/connect?arg=<multiaddr>` - Dial a peer
+- `POST /api/v0/swarm/disconnect?arg=<multiaddr>` - Close connection to peer
+
+**Node Info:**
+- `GET /api/v0/version` - Get node version
+- `GET /api/v0/stats/bw` - Get bandwidth statistics
+
+### Authentication
+
+Set `HELIA_SECRET_KEY` environment variable to enable Bearer token authentication on all endpoints.
 
 ## Usage
 
