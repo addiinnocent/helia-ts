@@ -26,6 +26,7 @@ build/
 *.swo
 *~
 *.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store

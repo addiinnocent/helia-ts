@@ -45,21 +45,24 @@ const SOCKET_CONFIG = {
  * These are passed to the SDK requestHandler to control connection reuse.
  */
 function createHttpAgents() {
-  const httpAgent = new http.Agent({
+  const httpAgentOptions = {
     maxSockets: SOCKET_CONFIG.maxSockets,
     maxFreeSockets: SOCKET_CONFIG.maxFreeSockets,
     timeout: SOCKET_CONFIG.socketTimeout,
     keepAlive: SOCKET_CONFIG.keepAlive,
     keepAliveInitialDelay: SOCKET_CONFIG.keepAliveInitialDelay
-  })
+  } as Record<string, unknown>
 
-  const httpsAgent = new https.Agent({
+  const httpsAgentOptions = {
     maxSockets: SOCKET_CONFIG.maxSockets,
     maxFreeSockets: SOCKET_CONFIG.maxFreeSockets,
     timeout: SOCKET_CONFIG.socketTimeout,
     keepAlive: SOCKET_CONFIG.keepAlive,
     keepAliveInitialDelay: SOCKET_CONFIG.keepAliveInitialDelay
-  })
+  } as Record<string, unknown>
+
+  const httpAgent = new http.Agent(httpAgentOptions)
+  const httpsAgent = new https.Agent(httpsAgentOptions)
 
   return { httpAgent, httpsAgent }
 }
