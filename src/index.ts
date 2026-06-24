@@ -4,6 +4,10 @@ import { getHeliaInstance, stopHeliaInstance } from '@storage/helia.js'
 import { destroyS3Client } from '@storage/s3-client.js'
 import { startDashboardServer, stopDashboardServer } from '@dashboard/server.js'
 import { startApiServer, stopApiServer } from '@api/server.js'
+import { initIpnsStore, closeIpnsStore } from '@ipns/store.js'
+import { initIPNS, getIPNS } from '@lib/ipns.js'
+import { startRepublishLoop, stopRepublishLoop } from '@ipns/republish.js'
+import { getKeychain } from '@storage/helia.js'
 
 const logger = createComponentLogger('helia')
 
@@ -26,6 +30,15 @@ async function start() {
       addresses: addressStrings
     })
 
+    // Initialise IPNS store and instance
+    await initIpnsStore()
+    await initIPNS(helia)
+
+    // Start republish loop for persisted IPNS records
+    const ipns = getIPNS()
+    const keychain = getKeychain()
+    await startRepublishLoop(ipns, keychain)
+
     // Start dashboard on separate port
     dashboardServer = startDashboardServer()
 
@@ -46,6 +59,8 @@ async function handleShutdown(signal: string) {
     if (apiServer) {
       await stopApiServer(apiServer)
     }
+    stopRepublishLoop()
+    await closeIpnsStore()
     await stopHeliaInstance()
     await destroyS3Client()
     logger.info('Shutdown complete')

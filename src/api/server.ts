@@ -3,12 +3,13 @@ import { CID } from 'multiformats/cid'
 import { multiaddr } from '@multiformats/multiaddr'
 import { sha256 } from 'multiformats/hashes/sha2'
 import * as raw from 'multiformats/codecs/raw'
-import { getHeliaInstance, getHeliaPeerId, getMultiaddrs, getConnectionDetails } from '@storage/helia.js'
+import { getHeliaInstance, getHeliaPeerId, getMultiaddrs, getConnectionDetails, getKeychain } from '@storage/helia.js'
 import { addString, addBytes, addFile } from '@lib/add.js'
 import { getBytes } from '@lib/get.js'
 import { pinCID, unpinCID, isPinned, listPins } from '@lib/pin.js'
 import { provideCID, findProviders } from '@lib/routing.js'
 import { createComponentLogger } from '@utils/logger.js'
+import { keyGen, namePublish, nameResolve, keyList, getIPNS, initIPNS } from '@lib/ipns.js'
 
 const logger = createComponentLogger('api')
 const API_PORT = parseInt(process.env.API_PORT || '8081', 10)
@@ -585,6 +586,124 @@ async function handleRequest(req: any, res: any): Promise<void> {
         RateIn: 0,
         RateOut: 0
       }))
+      return
+    }
+
+    // POST /api/v0/key/gen?arg=<keyName>&type=ed25519
+    if (req.method === 'POST' && urlPath === '/api/v0/key/gen') {
+      const keyName = getQueryParam(req.url, 'arg')
+      const keyType = getQueryParam(req.url, 'type')
+
+      if (!keyName) {
+        res.writeHead(400)
+        res.end(JSON.stringify({ error: 'Missing required arg parameter' }))
+        return
+      }
+
+      if (!keyType || keyType !== 'ed25519') {
+        res.writeHead(400)
+        res.end(JSON.stringify({ error: 'Only type=ed25519 is supported' }))
+        return
+      }
+
+      try {
+        const keychain = getKeychain()
+        const result = await keyGen(keychain, keyName)
+        res.writeHead(200)
+        res.end(JSON.stringify(result))
+      } catch (error: any) {
+        logger.error('key/gen failed', { error: error.message })
+        res.writeHead(500)
+        res.end(JSON.stringify({ error: error.message || 'Failed to generate key' }))
+      }
+      return
+    }
+
+    // POST /api/v0/name/publish?arg=/ipfs/<cid>&key=<keyName>&lifetime=87600h&resolve=false
+    if (req.method === 'POST' && urlPath === '/api/v0/name/publish') {
+      const cidStr = getQueryParam(req.url, 'arg')
+      const keyName = getQueryParam(req.url, 'key')
+      const lifetimeStr = getQueryParam(req.url, 'lifetime') || '87600h'
+
+      if (!cidStr || !cidStr.startsWith('/ipfs/')) {
+        res.writeHead(400)
+        res.end(JSON.stringify({ error: 'Missing or invalid arg parameter (must be /ipfs/<cid>)' }))
+        return
+      }
+
+      if (!keyName) {
+        res.writeHead(400)
+        res.end(JSON.stringify({ error: 'Missing required key parameter' }))
+        return
+      }
+
+      try {
+        const cid = CID.parse(cidStr.substring(6))
+        const lifetime = ((): number => {
+          const match = lifetimeStr.match(/^(\d+)([hms])$/)
+          if (!match) return 365 * 24 * 60 * 60 * 1000
+          const [, value, unit] = match
+          const num = parseInt(value, 10)
+          switch (unit) {
+            case 'h': return num * 60 * 60 * 1000
+            case 'm': return num * 60 * 1000
+            case 's': return num * 1000
+            default: return 365 * 24 * 60 * 60 * 1000
+          }
+        })()
+
+        const ipns = getIPNS()
+        const keychain = getKeychain()
+        const result = await namePublish(ipns, keychain, keyName, cid, lifetime)
+        res.writeHead(200)
+        res.end(JSON.stringify(result))
+      } catch (error: any) {
+        if (error.message?.includes('not found') || error.message?.includes('Key not found')) {
+          res.writeHead(404)
+          res.end(JSON.stringify({ error: 'Key not found' }))
+        } else {
+          logger.error('name/publish failed', { error: error.message })
+          res.writeHead(400)
+          res.end(JSON.stringify({ error: error.message || 'Failed to publish IPNS record' }))
+        }
+      }
+      return
+    }
+
+    // GET /api/v0/name/resolve?arg=<ipnsName>
+    if (req.method === 'GET' && urlPath === '/api/v0/name/resolve') {
+      const name = getQueryParam(req.url, 'arg')
+      if (!name) {
+        res.writeHead(400)
+        res.end(JSON.stringify({ error: 'Missing required arg parameter' }))
+        return
+      }
+
+      try {
+        const ipns = getIPNS()
+        const result = await nameResolve(ipns, name)
+        res.writeHead(200)
+        res.end(JSON.stringify(result))
+      } catch (error: any) {
+        logger.error('name/resolve failed', { error: error.message })
+        res.writeHead(404)
+        res.end(JSON.stringify({ error: 'IPNS name not found or could not be resolved' }))
+      }
+      return
+    }
+
+    // GET /api/v0/key/list
+    if (req.method === 'GET' && urlPath === '/api/v0/key/list') {
+      try {
+        const keychain = getKeychain()
+        const result = await keyList(keychain)
+        res.writeHead(200)
+        res.end(JSON.stringify(result))
+      } catch (error: any) {
+        logger.error('key/list failed', { error: error.message })
+        res.writeHead(500)
+        res.end(JSON.stringify({ error: error.message || 'Failed to list keys' }))
+      }
       return
     }
 
