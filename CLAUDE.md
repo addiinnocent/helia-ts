@@ -29,6 +29,7 @@ Comprehensive documentation is available in the `.md/` directory:
 - **[ARCHITECTURE.md](.md/ARCHITECTURE.md)** - System design and minimal Helia + S3 architecture
 - **[S3-STORAGE.md](.md/S3-STORAGE.md)** - S3Datastore error wrapper details (CRITICAL)
 - **[HELIA_101.md](.md/HELIA_101.md)** - Working code examples for Helia features
+- **[IPNS.md](.md/IPNS.md)** - IPNS naming: keychain service, publish/resolve API, republish loop
 - **[WIKI_REFERENCE.md](.md/WIKI_REFERENCE.md)** - Links to official Helia wiki and resources
 - **[CID_ANATOMY.md](.md/CID_ANATOMY.md)** - Educational reference on IPFS CID structure
 
