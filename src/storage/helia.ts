@@ -9,19 +9,15 @@ import { mplex } from '@libp2p/mplex'
 import { bootstrap } from '@libp2p/bootstrap'
 import { kadDHT } from '@libp2p/kad-dht'
 import { bitswap, trustlessGateway } from '@helia/block-brokers'
-import { Keychain } from '@libp2p/keychain'
-import { LevelDatastore } from 'datastore-level'
+import { keychain } from '@libp2p/keychain'
+import type { Keychain } from '@libp2p/keychain'
 import { ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
 import { logger } from '@utils/logger.js'
 import { getS3Client } from '@storage/s3-client.js'
-import path from 'path'
-import os from 'os'
 
 let heliaInstance: Helia | null = null
 let datastore: any = null
 let blockstore: any = null
-let keychainDs: any = null
-let keychain: Keychain | null = null
 let isInitialising = false
 
 const endpoint = process.env.S3_ENDPOINT || 'http://localhost:9000'
@@ -128,28 +124,6 @@ async function prunePeerstore(): Promise<void> {
   }
 }
 
-
-/**
- * Initialise a persistent keychain datastore backed by LevelDB.
- * This stores IPNS keys so they survive across restarts.
- *
- * @returns Promise<Keychain> - initialised keychain instance
- * @throws Error if keychain initialisation fails
- */
-async function initKeychainDatastore(): Promise<Keychain> {
-  const keychainPath = process.env.KEYCHAIN_PATH || path.join(os.homedir(), '.helia-keychain')
-  try {
-    keychainDs = new LevelDatastore(keychainPath, { createIfMissing: true })
-    await keychainDs.open()
-    keychain = new Keychain(keychainDs, { dek: {} })
-    logger.info('Keychain datastore initialised', { path: keychainPath })
-    return keychain
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    logger.error('Failed to initialise keychain datastore', { error: errorMsg })
-    throw new Error(`Keychain initialisation failed: ${errorMsg}`)
-  }
-}
 
 /**
  * Test S3 connectivity before mounting storage.
@@ -322,9 +296,6 @@ export async function getHeliaInstance(): Promise<Helia> {
     // See prunePeerstore() for the full rationale.
     await prunePeerstore()
 
-    // Initialise persistent keychain for IPNS key storage
-    await initKeychainDatastore()
-
     // Create a minimal Helia node with blockstore, datastore, and block brokers
     // blockBrokers enables peer-to-peer block retrieval via bitswap and fallback to trustless gateways
     heliaInstance = await createHelia({
@@ -349,9 +320,6 @@ export async function getHeliaInstance(): Promise<Helia> {
         connectionManager: {
           maxConnections: 50
         },
-        keychain: {
-          datastore: keychainDs
-        },
         // NOTE: Helia merges this libp2p config over its defaults with a SHALLOW
         // spread, so each top-level key REPLACES Helia's default entirely. The
         // previous code set `streamMuxers: [mplex()]`, which wiped out Helia's
@@ -368,7 +336,8 @@ export async function getHeliaInstance(): Promise<Helia> {
         services: {
           identify: identify(),
           ping: ping(),
-          dht: kadDHT({ clientMode: false })
+          dht: kadDHT({ clientMode: false }),
+          keychain: keychain()
         }
       }
     } as any)
@@ -521,15 +490,19 @@ export function getHeliaPeerId(): string {
 
 /**
  * Get the keychain instance for IPNS key operations.
- * Throws if keychain is not initialised.
+ * Throws if Helia is not initialised.
  *
  * @returns The keychain instance
  */
 export function getKeychain(): Keychain {
-  if (!keychain) {
+  if (!heliaInstance) {
+    throw new Error('Helia not initialised')
+  }
+  const kc = heliaInstance.libp2p.services.keychain as Keychain
+  if (!kc) {
     throw new Error('Keychain not initialised')
   }
-  return keychain
+  return kc
 }
 
 /**

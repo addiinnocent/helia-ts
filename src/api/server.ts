@@ -9,7 +9,7 @@ import { getBytes } from '@lib/get.js'
 import { pinCID, unpinCID, isPinned, listPins } from '@lib/pin.js'
 import { provideCID, findProviders } from '@lib/routing.js'
 import { createComponentLogger } from '@utils/logger.js'
-import { keyGen, namePublish, nameResolve, keyList, getIPNS, initIPNS } from '@lib/ipns.js'
+import { keyGen, keyList, keyRemove, keyRename, namePublish, nameResolve, getIPNS, initIPNS } from '@lib/ipns.js'
 
 const logger = createComponentLogger('api')
 const API_PORT = parseInt(process.env.API_PORT || '8081', 10)
@@ -66,6 +66,37 @@ function parseMultipartForm(body: Uint8Array, contentType: string): Map<string, 
 function getQueryParam(url: string, paramName: string): string | null {
   const parsed = new URL(url, 'http://localhost')
   return parsed.searchParams.get(paramName)
+}
+
+/**
+ * Send an error response in the Kubo RPC API shape: { Message, Code, Type }.
+ * Kubo uses HTTP 500 for command errors and 400 for bad client input.
+ */
+function sendKuboError(res: any, statusCode: number, message: string): void {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' })
+  res.end(JSON.stringify({ Message: message, Code: 0, Type: 'error' }))
+}
+
+/**
+ * Parse a Kubo duration string (e.g. "24h", "87600h", "5m", "30s") to ms.
+ * Returns undefined when the input is empty/unparseable so callers can fall
+ * back to library defaults.
+ */
+function parseDuration(value: string | null): number | undefined {
+  if (!value) return undefined
+  const match = value.match(/^(\d+)(h|m|s|ms|ns|us|µs)$/)
+  if (!match) return undefined
+  const num = parseInt(match[1], 10)
+  switch (match[2]) {
+    case 'h': return num * 60 * 60 * 1000
+    case 'm': return num * 60 * 1000
+    case 's': return num * 1000
+    case 'ms': return num
+    case 'us':
+    case 'µs': return num / 1000
+    case 'ns': return num / 1_000_000
+    default: return undefined
+  }
 }
 
 function checkAuthentication(req: any, res: any): boolean {
@@ -589,120 +620,135 @@ async function handleRequest(req: any, res: any): Promise<void> {
       return
     }
 
-    // POST /api/v0/key/gen?arg=<keyName>&type=ed25519
+    // POST /api/v0/key/gen?arg=<keyName>&type=ed25519&size=<bits>
     if (req.method === 'POST' && urlPath === '/api/v0/key/gen') {
       const keyName = getQueryParam(req.url, 'arg')
-      const keyType = getQueryParam(req.url, 'type')
+      const keyType = getQueryParam(req.url, 'type') || 'ed25519'
+      const sizeStr = getQueryParam(req.url, 'size')
+      const size = sizeStr ? parseInt(sizeStr, 10) : undefined
 
       if (!keyName) {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'Missing required arg parameter' }))
-        return
-      }
-
-      if (!keyType || keyType !== 'ed25519') {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'Only type=ed25519 is supported' }))
+        sendKuboError(res, 400, 'argument "name" is required')
         return
       }
 
       try {
         const keychain = getKeychain()
-        const result = await keyGen(keychain, keyName)
-        res.writeHead(200)
+        const result = await keyGen(keychain, keyName, keyType, size)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify(result))
       } catch (error: any) {
         logger.error('key/gen failed', { error: error.message })
-        res.writeHead(500)
-        res.end(JSON.stringify({ error: error.message || 'Failed to generate key' }))
+        sendKuboError(res, 500, error.message || 'failed to generate key')
       }
       return
     }
 
-    // POST /api/v0/name/publish?arg=/ipfs/<cid>&key=<keyName>&lifetime=87600h&resolve=false
-    if (req.method === 'POST' && urlPath === '/api/v0/name/publish') {
-      const cidStr = getQueryParam(req.url, 'arg')
-      const keyName = getQueryParam(req.url, 'key')
-      const lifetimeStr = getQueryParam(req.url, 'lifetime') || '87600h'
-
-      if (!cidStr || !cidStr.startsWith('/ipfs/')) {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'Missing or invalid arg parameter (must be /ipfs/<cid>)' }))
-        return
-      }
-
-      if (!keyName) {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'Missing required key parameter' }))
-        return
-      }
-
+    // GET|POST /api/v0/key/list?l=<long>
+    if ((req.method === 'POST' || req.method === 'GET') && urlPath === '/api/v0/key/list') {
       try {
-        const cid = CID.parse(cidStr.substring(6))
-        const lifetime = ((): number => {
-          const match = lifetimeStr.match(/^(\d+)([hms])$/)
-          if (!match) return 365 * 24 * 60 * 60 * 1000
-          const [, value, unit] = match
-          const num = parseInt(value, 10)
-          switch (unit) {
-            case 'h': return num * 60 * 60 * 1000
-            case 'm': return num * 60 * 1000
-            case 's': return num * 1000
-            default: return 365 * 24 * 60 * 60 * 1000
-          }
-        })()
-
-        const ipns = getIPNS()
         const keychain = getKeychain()
-        const result = await namePublish(ipns, keychain, keyName, cid, lifetime)
-        res.writeHead(200)
+        const result = await keyList(keychain)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify(result))
       } catch (error: any) {
-        if (error.message?.includes('not found') || error.message?.includes('Key not found')) {
-          res.writeHead(404)
-          res.end(JSON.stringify({ error: 'Key not found' }))
+        logger.error('key/list failed', { error: error.message })
+        sendKuboError(res, 500, error.message || 'failed to list keys')
+      }
+      return
+    }
+
+    // POST /api/v0/key/rm?arg=<keyName>
+    if (req.method === 'POST' && urlPath === '/api/v0/key/rm') {
+      const keyName = getQueryParam(req.url, 'arg')
+      if (!keyName) {
+        sendKuboError(res, 400, 'argument "name" is required')
+        return
+      }
+      try {
+        const keychain = getKeychain()
+        const result = await keyRemove(keychain, keyName)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(result))
+      } catch (error: any) {
+        logger.error('key/rm failed', { error: error.message })
+        sendKuboError(res, 500, error.message || 'failed to remove key')
+      }
+      return
+    }
+
+    // POST /api/v0/key/rename?arg=<oldName>&arg=<newName>
+    if (req.method === 'POST' && urlPath === '/api/v0/key/rename') {
+      const args = new URL(req.url, 'http://localhost').searchParams.getAll('arg')
+      const [oldName, newName] = args
+      if (!oldName || !newName) {
+        sendKuboError(res, 400, 'arguments "name" and "newName" are required')
+        return
+      }
+      try {
+        const keychain = getKeychain()
+        const result = await keyRename(keychain, oldName, newName)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(result))
+      } catch (error: any) {
+        logger.error('key/rename failed', { error: error.message })
+        sendKuboError(res, 500, error.message || 'failed to rename key')
+      }
+      return
+    }
+
+    // POST /api/v0/name/publish?arg=/ipfs/<cid>&key=<keyName>&lifetime=24h&ttl=<dur>&allow-offline=<bool>
+    if (req.method === 'POST' && urlPath === '/api/v0/name/publish') {
+      let cidStr = getQueryParam(req.url, 'arg')
+      const keyName = getQueryParam(req.url, 'key') || 'self'
+      const lifetime = parseDuration(getQueryParam(req.url, 'lifetime')) ?? 24 * 60 * 60 * 1000
+      const ttl = parseDuration(getQueryParam(req.url, 'ttl'))
+      const offline = getQueryParam(req.url, 'allow-offline') === 'true'
+
+      if (!cidStr) {
+        sendKuboError(res, 400, 'argument "ipfs-path" is required')
+        return
+      }
+      // Accept "/ipfs/<cid>", "/ipfs/<cid>/..." or a bare CID.
+      cidStr = cidStr.replace(/^\/ipfs\//, '')
+      const rootCid = cidStr.split('/')[0]
+
+      try {
+        const cid = CID.parse(rootCid)
+        const ipns = getIPNS()
+        const options: any = { lifetime, offline }
+        if (ttl !== undefined) options.ttl = ttl
+        const result = await namePublish(ipns, keyName, cid, options)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify(result))
+      } catch (error: any) {
+        const msg = error.message || 'failed to publish IPNS record'
+        if (/no key|not found|does not exist/i.test(msg)) {
+          sendKuboError(res, 500, `no key by the name of "${keyName}" was found`)
         } else {
-          logger.error('name/publish failed', { error: error.message })
-          res.writeHead(400)
-          res.end(JSON.stringify({ error: error.message || 'Failed to publish IPNS record' }))
+          logger.error('name/publish failed', { error: msg })
+          sendKuboError(res, 500, msg)
         }
       }
       return
     }
 
-    // GET /api/v0/name/resolve?arg=<ipnsName>
-    if (req.method === 'GET' && urlPath === '/api/v0/name/resolve') {
+    // GET|POST /api/v0/name/resolve?arg=<ipnsName>&recursive=true
+    if ((req.method === 'POST' || req.method === 'GET') && urlPath === '/api/v0/name/resolve') {
       const name = getQueryParam(req.url, 'arg')
       if (!name) {
-        res.writeHead(400)
-        res.end(JSON.stringify({ error: 'Missing required arg parameter' }))
+        sendKuboError(res, 400, 'argument "name" is required')
         return
       }
 
       try {
         const ipns = getIPNS()
         const result = await nameResolve(ipns, name)
-        res.writeHead(200)
+        res.writeHead(200, { 'Content-Type': 'application/json' })
         res.end(JSON.stringify(result))
       } catch (error: any) {
         logger.error('name/resolve failed', { error: error.message })
-        res.writeHead(404)
-        res.end(JSON.stringify({ error: 'IPNS name not found or could not be resolved' }))
-      }
-      return
-    }
-
-    // GET /api/v0/key/list
-    if (req.method === 'GET' && urlPath === '/api/v0/key/list') {
-      try {
-        const keychain = getKeychain()
-        const result = await keyList(keychain)
-        res.writeHead(200)
-        res.end(JSON.stringify(result))
-      } catch (error: any) {
-        logger.error('key/list failed', { error: error.message })
-        res.writeHead(500)
-        res.end(JSON.stringify({ error: error.message || 'Failed to list keys' }))
+        sendKuboError(res, 500, 'could not resolve name')
       }
       return
     }

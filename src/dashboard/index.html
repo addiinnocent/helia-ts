@@ -199,6 +199,31 @@
       </div>
     </div>
 
+    <!-- IPNS -->
+    <div class="section">
+      <h2>IPNS (Naming)</h2>
+      <p style="font-size: 0.9em; color: #666; margin-top: 0;">
+        Kubo-compatible IPNS. Maps a stable, key-derived name (k51&hellip;) to a
+        mutable IPFS CID. Keys are managed by the libp2p keychain and persist in
+        the S3 datastore. Published records are re-announced automatically by
+        the built-in @helia/ipns republisher.
+      </p>
+      <dl id="ipns-routes">
+        <dt>POST /api/v0/key/gen?arg=&lt;keyName&gt;&amp;type=ed25519&amp;size=&lt;bits&gt;</dt>
+        <dd>Generate (or return existing) key. Idempotent. type defaults to ed25519 (rsa/secp256k1/ecdsa accepted; size is RSA-only). Returns <span class="status-value">{ Name, Id }</span> where Id is the k51&hellip; IPNS name.</dd>
+        <dt>GET|POST /api/v0/key/list</dt>
+        <dd>List all keychain keys. Returns <span class="status-value">{ Keys: [{ Name, Id }] }</span>.</dd>
+        <dt>POST /api/v0/key/rm?arg=&lt;keyName&gt;</dt>
+        <dd>Remove a key. Returns <span class="status-value">{ Keys: [{ Name, Id }] }</span>.</dd>
+        <dt>POST /api/v0/key/rename?arg=&lt;oldName&gt;&amp;arg=&lt;newName&gt;</dt>
+        <dd>Rename a key. Returns <span class="status-value">{ Was, Now, Id, Overwrite }</span>.</dd>
+        <dt>POST /api/v0/name/publish?arg=/ipfs/&lt;cid&gt;&amp;key=&lt;keyName&gt;&amp;lifetime=24h&amp;ttl=&lt;dur&gt;&amp;allow-offline=&lt;bool&gt;</dt>
+        <dd>Sign and publish an IPNS record. key defaults to self; lifetime defaults to 24h. Returns <span class="status-value">{ Name, Value }</span>.</dd>
+        <dt>GET|POST /api/v0/name/resolve?arg=&lt;ipnsName&gt;&amp;recursive=true</dt>
+        <dd>Recursively resolve a k51&hellip; name (with or without /ipns/ prefix) to its current /ipfs/&hellip; path. Returns <span class="status-value">{ Path }</span>.</dd>
+      </dl>
+    </div>
+
     <!-- S3 Storage -->
     <div class="section">
       <h2>Storage (S3)</h2>

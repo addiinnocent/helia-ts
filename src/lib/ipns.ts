@@ -1,14 +1,11 @@
 import { Helia } from 'helia'
-import { IPNS } from '@helia/ipns'
-import { Keychain } from '@libp2p/keychain'
-import { CID } from 'multiformats'
+import { ipns as createIpns } from '@helia/ipns'
+import type { IPNS, PublishOptions } from '@helia/ipns'
+import type { Keychain } from '@libp2p/keychain'
+import type { KeyType } from '@libp2p/interface'
+import { generateKeyPair } from '@libp2p/crypto/keys'
+import { CID } from 'multiformats/cid'
 import { base36 } from 'multiformats/bases/base36'
-import {
-  saveIpnsRecord as saveRecord,
-  getIpnsRecord as getRecord,
-  getAllIpnsRecords as getAllRecords,
-  IpnsRecord
-} from '@ipns/store.js'
 import { createComponentLogger } from '@utils/logger.js'
 
 const logger = createComponentLogger('ipns')
@@ -18,12 +15,16 @@ let ipnsInstance: IPNS | null = null
 /**
  * Initialise the IPNS instance.
  * Call this after Helia is ready.
+ *
+ * The instance is backed by Helia's (S3) datastore and starts its own
+ * republisher automatically when Helia starts, so published records are
+ * re-signed and re-announced without any manual loop.
  */
 export async function initIPNS(helia: Helia): Promise<IPNS> {
   if (ipnsInstance) {
     return ipnsInstance
   }
-  ipnsInstance = await createIPNS(helia)
+  ipnsInstance = createIpns(helia)
   logger.debug('IPNS instance initialised')
   return ipnsInstance
 }
@@ -39,164 +40,151 @@ export function getIPNS(): IPNS {
 }
 
 /**
- * Parse a lifetime string (e.g. "87600h") into milliseconds.
+ * Map a Kubo key-type string (case-insensitive) to a libp2p KeyType.
  */
-function parseLifetime(lifetimeStr: string): number {
-  const match = lifetimeStr.match(/^(\d+)([hms])$/)
-  if (!match) {
-    return 365 * 24 * 60 * 60 * 1000
-  }
-  const [, value, unit] = match
-  const num = parseInt(value, 10)
-  switch (unit) {
-    case 'h':
-      return num * 60 * 60 * 1000
-    case 'm':
-      return num * 60 * 1000
-    case 's':
-      return num * 1000
+function normaliseKeyType(type: string): KeyType {
+  switch (type.toLowerCase()) {
+    case 'ed25519':
+      return 'Ed25519'
+    case 'rsa':
+      return 'RSA'
+    case 'secp256k1':
+      return 'secp256k1'
+    case 'ecdsa':
+      return 'ECDSA'
     default:
-      return 365 * 24 * 60 * 60 * 1000
+      throw new Error(`Unsupported key type: ${type}`)
   }
 }
 
 /**
- * Convert a public key to a base36 libp2p-key CIDv1 string (k51...).
+ * Derive the IPNS name (base36 `k51...` libp2p-key CID) for a key already in
+ * the keychain. This is the value Kubo returns as the key `Id`.
  */
-function publicKeyToIPNSName(publicKeyBytes: Uint8Array): string {
-  const cid = CID.createV1(0x72, { code: 0, digest: publicKeyBytes })
-  return cid.toString(base36)
+async function ipnsNameForKey(keychain: Keychain, keyName: string): Promise<string> {
+  const privateKey = await keychain.exportKey(keyName)
+  return privateKey.publicKey.toCID().toString(base36)
 }
 
 /**
- * Generate a new Ed25519 key.
- * Idempotent: if the key already exists, returns the existing key.
+ * Generate a new key (Kubo `key/gen`).
+ * Idempotent: if the key already exists, the existing key is returned.
  *
  * @param keychain - The keychain instance
  * @param keyName - The name for the new key
+ * @param type - Key type: ed25519 (default), rsa, secp256k1, ecdsa
+ * @param size - Key size in bits (RSA only)
  * @returns { Name, Id } where Id is the k51... IPNS name
  */
 export async function keyGen(
   keychain: Keychain,
-  keyName: string
+  keyName: string,
+  type: string = 'ed25519',
+  size?: number
 ): Promise<{ Name: string; Id: string }> {
   try {
-    const existing = await keychain.findKey(keyName)
-    if (existing) {
-      const pubKeyBytes = existing.public.marshal()
-      const ipnsName = publicKeyToIPNSName(pubKeyBytes)
-      logger.debug('Key already exists', { keyName, ipnsName })
-      return { Name: keyName, Id: ipnsName }
-    }
-  } catch (error) {
-    // Key doesn't exist, proceed to creation
+    await keychain.findKeyByName(keyName)
+    const id = await ipnsNameForKey(keychain, keyName)
+    logger.debug('Key already exists', { keyName, ipnsName: id })
+    return { Name: keyName, Id: id }
+  } catch {
+    // Key does not exist yet, fall through to creation
   }
 
-  try {
-    const key = await keychain.createKey(keyName, 'Ed25519')
-    const pubKeyBytes = key.public.marshal()
-    const ipnsName = publicKeyToIPNSName(pubKeyBytes)
-    logger.info('Key generated', { keyName, ipnsName })
-    return { Name: keyName, Id: ipnsName }
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    logger.error('Failed to generate key', { keyName, error: errorMsg })
-    throw error
-  }
+  const keyType = normaliseKeyType(type)
+  const privateKey = keyType === 'RSA'
+    ? await generateKeyPair('RSA', size ?? 2048)
+    : await generateKeyPair(keyType)
+  await keychain.importKey(keyName, privateKey)
+  const id = privateKey.publicKey.toCID().toString(base36)
+  logger.info('Key generated', { keyName, type: keyType, ipnsName: id })
+  return { Name: keyName, Id: id }
 }
 
 /**
- * Publish an IPNS record.
+ * List all keys in the keychain (Kubo `key/list`).
+ *
+ * @returns { Keys } array of { Name, Id }
+ */
+export async function keyList(keychain: Keychain): Promise<{ Keys: Array<{ Name: string; Id: string }> }> {
+  const infos = await keychain.listKeys()
+  const keys = await Promise.all(
+    infos.map(async (info) => ({
+      Name: info.name,
+      Id: await ipnsNameForKey(keychain, info.name)
+    }))
+  )
+  logger.debug('Keys listed', { count: keys.length })
+  return { Keys: keys }
+}
+
+/**
+ * Remove a key from the keychain (Kubo `key/rm`).
+ *
+ * @returns { Keys } the removed key as { Name, Id }
+ */
+export async function keyRemove(
+  keychain: Keychain,
+  keyName: string
+): Promise<{ Keys: Array<{ Name: string; Id: string }> }> {
+  // Resolve the IPNS name before removal, while the key still exists.
+  const id = await ipnsNameForKey(keychain, keyName)
+  await keychain.removeKey(keyName)
+  logger.info('Key removed', { keyName, ipnsName: id })
+  return { Keys: [{ Name: keyName, Id: id }] }
+}
+
+/**
+ * Rename a key in the keychain (Kubo `key/rename`).
+ *
+ * @returns { Was, Now, Id, Overwrite }
+ */
+export async function keyRename(
+  keychain: Keychain,
+  oldName: string,
+  newName: string
+): Promise<{ Was: string; Now: string; Id: string; Overwrite: boolean }> {
+  await keychain.renameKey(oldName, newName)
+  const id = await ipnsNameForKey(keychain, newName)
+  logger.info('Key renamed', { from: oldName, to: newName, ipnsName: id })
+  return { Was: oldName, Now: newName, Id: id, Overwrite: false }
+}
+
+/**
+ * Publish an IPNS record (Kubo `name/publish`).
  *
  * @param ipns - The IPNS instance
- * @param keychain - The keychain instance
- * @param keyName - The key name to publish with
+ * @param keyName - The key name to publish with (Kubo default: "self")
  * @param cid - The CID to publish
- * @param lifetime - The lifetime in milliseconds
+ * @param options - PublishOptions (lifetime, ttl, offline)
  * @returns { Name, Value } where Name is the k51... IPNS name
  */
 export async function namePublish(
   ipns: IPNS,
-  keychain: Keychain,
   keyName: string,
   cid: CID,
-  lifetime: number
+  options: PublishOptions = {}
 ): Promise<{ Name: string; Value: string }> {
-  try {
-    const key = await keychain.findKey(keyName)
-    if (!key) {
-      throw new Error(`Key not found: ${keyName}`)
-    }
-
-    const result = await ipns.publish(key, cid, { lifetime })
-    const ipnsName = result.name.toString()
-
-    const record: IpnsRecord = {
-      keyName,
-      ipnsName,
-      cid: cid.toString(),
-      publishedAt: Date.now(),
-      lifetime: `${Math.floor(lifetime / 3600000)}h`
-    }
-    await saveRecord(record)
-
-    logger.info('IPNS record published', { keyName, ipnsName, cid: cid.toString() })
-    return { Name: ipnsName, Value: `/ipfs/${cid.toString()}` }
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    logger.error('Failed to publish IPNS record', { keyName, error: errorMsg })
-    throw error
-  }
+  const result = await ipns.publish(keyName, cid, options)
+  const ipnsName = result.publicKey.toCID().toString(base36)
+  logger.info('IPNS record published', { keyName, ipnsName, cid: cid.toString() })
+  return { Name: ipnsName, Value: `/ipfs/${cid.toString()}` }
 }
 
 /**
- * Resolve an IPNS name.
+ * Resolve an IPNS name (Kubo `name/resolve`).
  *
  * @param ipns - The IPNS instance
  * @param name - The IPNS name (k51... or /ipns/k51...)
  * @returns { Path } where Path is /ipfs/...
  */
 export async function nameResolve(ipns: IPNS, name: string): Promise<{ Path: string }> {
-  try {
-    const namePath = name.startsWith('/ipns/') ? name : `/ipns/${name}`
-    const result = await ipns.resolve(namePath)
-    const path = result.toString()
-    logger.debug('IPNS name resolved', { name: namePath, path })
-    return { Path: path }
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    logger.error('Failed to resolve IPNS name', { name, error: errorMsg })
-    throw error
-  }
+  const clean = name.replace(/^\/ipns\//, '')
+  const key = CID.parse(clean, base36) as Parameters<IPNS['resolve']>[0]
+  const result = await ipns.resolve(key)
+  const path = result.path
+    ? `/ipfs/${result.cid.toString()}/${result.path}`
+    : `/ipfs/${result.cid.toString()}`
+  logger.debug('IPNS name resolved', { name: clean, path })
+  return { Path: path }
 }
-
-/**
- * List all keys in the keychain.
- *
- * @param keychain - The keychain instance
- * @returns { Keys } array of { Name, Id }
- */
-export async function keyList(keychain: Keychain): Promise<{ Keys: Array<{ Name: string; Id: string }> }> {
-  try {
-    const keys = await keychain.listKeys()
-    const result = await Promise.all(
-      keys.map(async (keyName: string) => {
-        const key = await keychain.findKey(keyName)
-        if (!key) return null
-        const pubKeyBytes = key.public.marshal()
-        const ipnsName = publicKeyToIPNSName(pubKeyBytes)
-        return { Name: keyName, Id: ipnsName }
-      })
-    )
-    const filtered = result.filter((k) => k !== null)
-    logger.debug('Keys listed', { count: filtered.length })
-    return { Keys: filtered }
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    logger.error('Failed to list keys', { error: errorMsg })
-    throw error
-  }
-}
-
-// Re-export store functions for use in server.ts
-export { saveIpnsRecord, getIpnsRecord, getAllIpnsRecords }
